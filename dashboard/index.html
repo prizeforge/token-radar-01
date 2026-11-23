@@ -3,15 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Token Radar ranks 178 pre-token DeFi protocols by implied value, with a farm plan for each, recomputed in the page from the snapshot's own figures.">
+<meta name="theme-color" content="#0f0f12">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f0f12'/%3E%3Ccircle cx='8' cy='8' r='5' fill='%23e8a33d'/%3E%3C/svg%3E">
 <title>Token Radar: pre-token protocols ranked by implied value</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
+<a class="skip" href="#board">Skip to board</a>
 <header class="top">
-  <p class="kicker">Token launch radar &middot; snapshot <span id="asof">&mdash;</span></p>
+  <p class="kicker">Token launch radar, snapshot <span id="asof">&mdash;</span></p>
   <h1>Token Radar</h1>
   <p class="lede"><span id="boardcount">178</span> pre-token protocols, ranked by implied value. Each one records no token; the board keeps them apart from the protocols whose token already trades.</p>
-  <dl class="stats" id="stats"></dl>
+  <!-- The five figures below are the same ones the page recomputes from
+       data.js on load (see renderStats in app.js); they are written out
+       here so the rail is full height on the first paint and nothing
+       below it shifts when the script re-fills them with identical
+       values. If the model ever changes a count, change it here too. -->
+  <dl class="stats" id="stats">
+    <div><dt>Watchlist covered</dt><dd>40 / 40</dd></div>
+    <div><dt>Board rows</dt><dd>178</dd></div>
+    <div><dt>Early rows</dt><dd>138</dd></div>
+    <div><dt>Floor</dt><dd>$50.0M</dd></div>
+    <div><dt>Already trading</dt><dd>20</dd></div>
+  </dl>
 </header>
 
 <section class="model" aria-label="How the value is worked out">
@@ -44,19 +59,19 @@
 <main>
   <section id="detail" class="detail" hidden aria-label="Protocol detail"></section>
 
-  <div class="tablewrap">
+  <div class="tablewrap boardwrap">
     <table id="board">
       <thead>
         <tr>
-          <th data-sort="rank" aria-sort="ascending">Rank</th>
-          <th data-sort="name">Protocol</th>
-          <th data-sort="category">Category</th>
+          <th data-sort="rank" aria-sort="ascending"><button type="button" aria-label="Sort by Rank">Rank</button></th>
+          <th data-sort="name"><button type="button" aria-label="Sort by Protocol">Protocol</button></th>
+          <th data-sort="category"><button type="button" aria-label="Sort by Category">Category</button></th>
           <th>Chains</th>
-          <th data-sort="tvl_usd">TVL</th>
-          <th data-sort="change_7d">7d</th>
-          <th data-sort="age_days">Age</th>
-          <th>Value</th>
-          <th data-sort="implied_value_usd">Implied value</th>
+          <th data-sort="tvl_usd"><button type="button" aria-label="Sort by TVL">TVL</button></th>
+          <th data-sort="change_7d"><button type="button" aria-label="Sort by 7d">7d</button></th>
+          <th data-sort="age_days"><button type="button" aria-label="Sort by Age">Age</button></th>
+          <th>Share</th>
+          <th data-sort="implied_value_usd"><button type="button" aria-label="Sort by Implied value">Implied value</button></th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
@@ -90,7 +105,7 @@
   <p id="selfcheck"></p>
 </footer>
 
-<script src="../data.js"></script>
-<script src="app.js"></script>
+<script src="../data.js" defer></script>
+<script src="app.js" defer></script>
 </body>
 </html>

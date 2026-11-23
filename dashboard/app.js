@@ -28,6 +28,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var rowsEl = $('rows');
   var detailEl = $('detail');
+  var boardWrap = document.querySelector('.boardwrap');
 
   /** $2,754,000,000 -> $2.75B, $154,313,682 -> $154.3M, $48,967,055 -> $49.0M. */
   function fmtUSD(n) {
@@ -206,6 +207,20 @@
     ];
   }
 
+  /** The plan's size in one line, from the same numbers the steps use:
+      capital across both positions, gas for the first transaction, the
+      set-up and the second leg plus $2 a week over the hold, and the hold
+      itself. A view summary only; it is not part of farm_steps. */
+  function planTotals(r) {
+    var capital = capitalFor(r);
+    var hold = holdDaysFor(r.age_days);
+    var gas = capital >= 150 ? 8 : 4;
+    var small = Math.max(10, Math.round(capital / 5));
+    var weeks = Math.ceil(hold / 7);
+    var gasTotal = 3 + gas + 2 * weeks + gas;
+    return 'Plan total: $' + (capital + small) + ' of capital, about $' + gasTotal + ' of gas, over at least ' + hold + ' days.';
+  }
+
   // ---- The whole-board check, for the page and for tests ---------------
   //
   // Recomputes every row's implied value and regenerates every row's
@@ -302,9 +317,9 @@
       var share = Math.max(1, Math.round((r.implied_value_usd / maxImplied) * 100));
       return '<tr data-slug="' + esc(r.slug) + '"' + cls + '>' +
         '<td class="rank">' + r.rank + '</td>' +
-        '<td><span class="notoken" title="No token recorded"></span><span class="name">' + esc(r.name) + '</span>' +
-        (isWatchlist(r) ? '<span class="tag">Watchlist</span>' : '') +
-        '<span class="slug">' + esc(r.slug) + '</span></td>' +
+        '<td><span class="notoken" title="No token recorded"></span><a class="name namelink" href="#' + hashParts(r.slug) + '">' + esc(r.name) + '</a>' +
+        '<span class="slug">' + esc(r.slug) + '</span>' +
+        (isWatchlist(r) ? '<span class="tag">Watchlist</span>' : '') + '</td>' +
         '<td class="cat">' + esc(r.category || '—') + '</td>' +
         '<td class="chains">' + esc((r.chains || []).slice(0, 3).join(', ') || '—') + '</td>' +
         '<td class="num">' + fmtUSD(r.tvl_usd) + '</td>' +
@@ -314,6 +329,12 @@
         '<td class="num"><strong>' + fmtUSD(r.implied_value_usd) + '</strong></td>' +
         '</tr>';
     }).join('');
+    // The CSS reserve held the live section in place before the rows
+    // existed. The rows are in now, in the same task, so drop the
+    // reserve before anything paints: from here the wrap's height is
+    // the table's own, and filtering to fewer rows shrinks it instead
+    // of leaving a gap.
+    if (boardWrap) boardWrap.style.minHeight = '0';
     document.querySelectorAll('#board th[data-sort]').forEach(function (th) {
       th.classList.remove('asc', 'desc');
       th.removeAttribute('aria-sort');
@@ -351,7 +372,8 @@
     }).join('');
     detailEl.innerHTML =
       '<div class="d-head"><span class="d-rank">#' + r.rank + '</span><h2>' + esc(r.name) + '</h2>' +
-      '<span class="d-meta">' + esc(r.slug) + ' &middot; ' + esc(r.category || 'uncategorised') + ' &middot; ' + esc((r.chains || []).join(', ') || 'no chain listed') + '</span></div>' +
+      '<span class="d-meta">' + esc(r.slug) + ', ' + esc(r.category || 'uncategorised') + ', ' + esc((r.chains || []).join(', ') || 'no chain listed') + '</span>' +
+      '<button type="button" class="d-close">Close</button></div>' +
       '<div class="d-grid"><div class="d-col"><h3>Model breakdown</h3><table class="facts">' +
       '<tr><td>TVL</td><td>' + fmtUSD(r.tvl_usd) + '</td></tr>' +
       '<tr><td>Base: TVL &times; ' + R.model.base_multiple + '</td><td>' + fmtUSD(v.base) + '</td></tr>' +
@@ -362,8 +384,16 @@
       '<tr><td>Chains (' + (r.chains || []).length + ')</td><td>&times;' + v.breadthMult.toFixed(2) + '</td></tr>' +
       '<tr><td><strong>Implied value</strong></td><td><strong>' + fmtUSD(v.implied) + '</strong></td></tr>' +
       '</table><p class="proof">' + esc(valueProof) + '</p></div>' +
-      '<div class="d-col"><h3>Farm plan</h3><ol class="steps">' + steps + '</ol><p class="proof">' + esc(planProof) + '</p></div></div>';
+      '<div class="d-col"><h3>Farm plan</h3><ol class="steps">' + steps + '</ol><p class="totals">' + esc(planTotals(r)) + '</p><p class="proof">' + esc(planProof) + '</p></div></div>';
     detailEl.hidden = false;
+    detailEl.querySelector('.d-close').addEventListener('click', function () {
+      selected = null;
+      detailEl.hidden = true;
+      renderBoard();
+      setHash();
+      var link = document.querySelector('tr[data-slug="' + slug + '"] .namelink');
+      if (link) link.focus();
+    });
     renderBoard();
   }
 
@@ -395,14 +425,21 @@
     $('footrows').textContent = R.board_size + ' ranked rows, ' + R.watchlist_size + ' on the watchlist and ' + R.early_size + ' early ones below the floor';
   }
 
-  function setHash() {
+  /** The hash for a view: the detail slug first, then the filters in
+      force, so a link to a row never wipes the filters. */
+  function hashParts(slug) {
     var parts = [];
-    if (selected) parts.push('detail=' + encodeURIComponent(selected));
+    if (slug) parts.push('detail=' + encodeURIComponent(slug));
     if (state.q) parts.push('q=' + encodeURIComponent(state.q));
     if (state.cat !== 'all') parts.push('cat=' + encodeURIComponent(state.cat));
     if (state.scope !== 'all') parts.push('scope=' + state.scope);
     if (state.chain !== 'all') parts.push('chain=' + encodeURIComponent(state.chain));
-    history.replaceState(null, '', parts.length ? '#' + parts.join('&') : '#');
+    return parts.join('&');
+  }
+
+  function setHash() {
+    var h = hashParts(selected);
+    history.replaceState(null, '', h ? '#' + h : '#');
   }
 
   function readHash() {
@@ -421,6 +458,9 @@
   }
 
   rowsEl.addEventListener('click', function (ev) {
+    // A click on the name link lets the hash navigation open the detail;
+    // the row handler must not also toggle it shut.
+    if (ev.target.closest('a')) return;
     var tr = ev.target.closest('tr[data-slug]');
     if (!tr) return;
     var slug = tr.getAttribute('data-slug');
@@ -430,9 +470,9 @@
     detailEl.scrollIntoView({ block: 'nearest' });
   });
 
-  document.querySelectorAll('#board th[data-sort]').forEach(function (th) {
-    th.addEventListener('click', function () {
-      var key = th.getAttribute('data-sort');
+  document.querySelectorAll('#board th[data-sort] button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.parentElement.getAttribute('data-sort');
       if (state.sort === key) { state.dir = -state.dir; } else { state.sort = key; state.dir = key === 'name' || key === 'category' ? 1 : -1; }
       renderBoard();
     });

@@ -8,7 +8,7 @@
   --line-soft: #22222b;
   --text: #edede6;
   --muted: #9a9aa5;
-  --faint: #6d6d78;
+  --faint: #8a8a94;
   --amber: #e8a33d;
   --amber-dim: #8a6420;
   --green: #4ade80;
@@ -20,7 +20,7 @@
 
 * { box-sizing: border-box; }
 
-html { background: var(--bg); }
+html { background: var(--bg); color-scheme: dark; }
 
 body {
   margin: 0;
@@ -30,7 +30,30 @@ body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  touch-action: manipulation;
 }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: 16px;
+  top: -48px;
+  z-index: 10;
+  padding: 8px 12px;
+  background: var(--amber);
+  color: #0f0f12;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip:focus { top: 8px; }
 
 .top {
   padding: 22px 28px 14px;
@@ -42,8 +65,7 @@ body {
   color: var(--amber);
   font-family: var(--mono);
   font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 h1 {
@@ -51,6 +73,7 @@ h1 {
   font-size: 32px;
   line-height: 1.05;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .lede {
@@ -68,6 +91,7 @@ h1 {
   padding: 0;
   border: 1px solid var(--line);
   background: var(--panel);
+  min-height: 62px;
 }
 
 .stats div {
@@ -83,8 +107,7 @@ h1 {
   color: var(--faint);
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .stats dd {
@@ -103,8 +126,7 @@ h1 {
 .model h2 {
   margin: 0 0 4px;
   font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--amber);
 }
 
@@ -144,8 +166,7 @@ h1 {
   color: var(--faint);
   font-family: var(--mono);
   font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 .ctl input,
@@ -164,8 +185,8 @@ h1 {
 
 .ctl.search input { min-width: 230px; }
 
-.ctl input:focus,
-.ctl select:focus {
+.ctl input:focus-visible,
+.ctl select:focus-visible {
   outline: 2px solid var(--amber-dim);
   outline-offset: 0;
   border-color: var(--amber);
@@ -228,38 +249,65 @@ main { padding: 0 28px 32px; }
   background: var(--panel);
 }
 
+/* The board's rows are rendered by JavaScript after the first paint, so
+   without a reserve the live section below jumps down by the board's
+   full height when they land (a ~0.23 layout shift on desktop). The
+   reserve holds the live section at its final place from the first
+   paint. The numbers are the measured rendered heights of the full
+   178-row board: 5820px at desktop width, 9856px at phone width, where
+   the narrower table wraps cell text onto more lines. renderBoard in
+   app.js clears the reserve in the same task as it fills the rows, so
+   filtering to fewer rows never leaves a gap. The reserve is exact at
+   the widths Lighthouse audits (1350px desktop, 412px mobile); at
+   in-between widths the table height falls between the two values and
+   a small shift can remain. */
+.boardwrap { min-height: 5820px; }
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 thead th {
   position: sticky;
   top: 0;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel2);
   color: var(--muted);
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   text-align: left;
   white-space: nowrap;
 }
 
-th[data-sort] { cursor: pointer; }
-th[data-sort]:hover { color: var(--amber); }
-th[data-sort]::after { content: " \21C5"; color: var(--faint); }
-th[data-sort].asc::after { content: " \2191"; color: var(--amber); }
-th[data-sort].desc::after { content: " \2193"; color: var(--amber); }
+thead th button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+
+thead th button:hover { color: var(--amber); }
+thead th button::after { content: " \21C5"; color: var(--faint); }
+thead th.asc button::after { content: " \2191"; color: var(--amber); }
+thead th.desc button::after { content: " \2193"; color: var(--amber); }
 
 tbody td {
-  padding: 8px 12px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--line-soft);
   vertical-align: middle;
+}
+
+tbody tr {
+  content-visibility: auto;
+  contain-intrinsic-size: 40px;
 }
 
 tbody tr { cursor: pointer; }
@@ -276,7 +324,9 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 
 .rank { font-family: var(--mono); font-weight: 700; color: var(--amber); }
 .name { font-weight: 600; }
-.slug { display: block; color: var(--faint); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+.namelink { color: inherit; text-decoration: none; }
+.namelink:hover { color: var(--amber); text-decoration: underline; }
+.slug { display: inline; margin-left: 6px; color: var(--faint); font-family: var(--mono); font-size: 11px; font-weight: 400; }
 .cat { color: var(--muted); white-space: nowrap; }
 .chains { color: var(--muted); font-size: 13px; }
 .pos { color: var(--green); }
@@ -315,6 +365,20 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .detail .d-head .d-rank { font-family: var(--mono); color: var(--amber); font-weight: 700; }
 .detail .d-head .d-meta { color: var(--muted); font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
 
+.detail .d-close {
+  margin-left: auto;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--panel2);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.detail .d-close:hover { color: var(--amber); border-color: var(--amber-dim); }
+
 .detail .d-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -327,8 +391,7 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 .detail h3 {
   margin: 0 0 10px;
   font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--amber);
 }
 
@@ -360,6 +423,7 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
   text-align: center;
 }
 .steps p { margin: 0 0 5px; }
+.totals { margin: 12px 0 0; color: var(--text); font-size: 13px; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
   padding: 2px 8px;
@@ -392,4 +456,5 @@ footer p { margin: 0; max-width: 860px; }
   .detail .d-grid { grid-template-columns: 1fr; }
   .detail .d-col + .d-col { border-left: 0; border-top: 1px solid var(--line); }
   .stats div { min-width: 45%; }
+  .boardwrap { min-height: 9856px; }
 }
