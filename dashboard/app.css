@@ -33,7 +33,7 @@ body {
 }
 
 .top {
-  padding: 40px 28px 24px;
+  padding: 22px 28px 14px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -47,31 +47,31 @@ body {
 }
 
 h1 {
-  margin: 0 0 10px;
-  font-size: 44px;
+  margin: 0 0 6px;
+  font-size: 32px;
   line-height: 1.05;
   letter-spacing: -0.02em;
 }
 
 .lede {
   margin: 0;
-  max-width: 760px;
+  max-width: 900px;
   color: var(--muted);
-  font-size: 17px;
+  font-size: 15px;
 }
 
 .stats {
   display: flex;
   flex-wrap: wrap;
   gap: 0;
-  margin: 24px 0 0;
+  margin: 16px 0 0;
   padding: 0;
   border: 1px solid var(--line);
   background: var(--panel);
 }
 
 .stats div {
-  padding: 12px 18px;
+  padding: 10px 18px;
   border-right: 1px solid var(--line);
   min-width: 130px;
 }
@@ -95,13 +95,13 @@ h1 {
 }
 
 .model {
-  padding: 20px 28px;
+  padding: 12px 28px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
 }
 
 .model h2 {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
   font-size: 13px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -110,12 +110,20 @@ h1 {
 
 .model p {
   margin: 0;
-  max-width: 860px;
+  max-width: 1100px;
   color: var(--text);
 }
 
+.model .formula {
+  max-width: none;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
 .model .fine {
-  margin-top: 8px;
+  margin-top: 6px;
   color: var(--muted);
   font-size: 13px;
 }
@@ -125,7 +133,7 @@ h1 {
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 14px;
-  padding: 18px 28px;
+  padding: 12px 28px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -170,6 +178,47 @@ h1 {
   font-size: 13px;
 }
 
+.legend {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.notoken {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.barcell { width: 90px; min-width: 70px; }
+
+.bar {
+  display: block;
+  height: 8px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+}
+
+.proof {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--amber);
+  font-size: 13px;
+}
+
 main { padding: 0 28px 32px; }
 
 .tablewrap {
@@ -208,9 +257,9 @@ th[data-sort].asc::after { content: " \2191"; color: var(--amber); }
 th[data-sort].desc::after { content: " \2193"; color: var(--amber); }
 
 tbody td {
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line-soft);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 tbody tr { cursor: pointer; }
