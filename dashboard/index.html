@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar: pre-token protocols ranked by implied value</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="top">
+  <p class="kicker">Token launch radar &middot; snapshot <span id="asof">&mdash;</span></p>
+  <h1>Token Radar</h1>
+  <p class="lede">Every protocol that records no token, ranked by what its token would be worth if the record stayed as it is. The board keeps the ones still to come apart from the ones whose token already trades.</p>
+  <dl class="stats" id="stats"></dl>
+</header>
+
+<section class="model" aria-label="How the value is worked out">
+  <h2>How the value is worked out</h2>
+  <p>Implied value starts at 30% of a protocol&rsquo;s TVL. Seven-day growth moves it: growth is clamped to &minus;50% &hellip; +100% and counts at 60% weight. How long the protocol has run with no token moves it again, from 0.70 for a new listing to 1.20 after four years. Running on more chains adds 4% a chain, up to five extra chains. Nothing is special-cased by name: the same rule scores every row.</p>
+  <p class="fine">A protocol &ldquo;records no token&rdquo; when its DefiLlama record carries no market cap, no CoinGecko id and no symbol. That is the record&rsquo;s word, not proof it has none. The board never predicts whether or when a token is issued.</p>
+</section>
+
+<nav class="controls" aria-label="Board filters">
+  <label class="ctl search">Search
+    <input id="q" type="search" placeholder="Name or slug" autocomplete="off">
+  </label>
+  <label class="ctl">Category
+    <select id="cat"></select>
+  </label>
+  <label class="ctl">Scope
+    <select id="scope">
+      <option value="all">All rows</option>
+      <option value="watchlist">Watchlist only</option>
+      <option value="early">Early, below the floor</option>
+    </select>
+  </label>
+  <label class="ctl">Chain
+    <select id="chain"></select>
+  </label>
+  <p class="count" id="count"></p>
+</nav>
+
+<main>
+  <section id="detail" class="detail" hidden aria-label="Protocol detail"></section>
+
+  <div class="tablewrap">
+    <table id="board">
+      <thead>
+        <tr>
+          <th data-sort="rank" aria-sort="ascending">Rank</th>
+          <th data-sort="name">Protocol</th>
+          <th data-sort="category">Category</th>
+          <th>Chains</th>
+          <th data-sort="tvl_usd">TVL</th>
+          <th data-sort="change_7d">7d</th>
+          <th data-sort="age_days">Age</th>
+          <th data-sort="implied_value_usd">Implied value</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <section class="live" aria-label="Protocols whose token already trades">
+    <h2>Already trading</h2>
+    <p>The market&rsquo;s own values, not the model&rsquo;s. These protocols are not on the board above.</p>
+    <div class="tablewrap">
+      <table id="livetable">
+        <thead>
+          <tr>
+            <th>Protocol</th>
+            <th>Category</th>
+            <th>Chains</th>
+            <th>TVL</th>
+            <th>Market cap</th>
+            <th>MC / TVL</th>
+            <th>7d</th>
+          </tr>
+        </thead>
+        <tbody id="liverows"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>Source: DefiLlama protocols snapshot, fetched <span id="src"></span>. Board rows: <span id="footrows"></span>. Farm plans are the entry&rsquo;s own reading of each protocol&rsquo;s record; they are not investment advice.</p>
+</footer>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
