@@ -1,22 +1,23 @@
-/* Token Radar dashboard: flat ink, amber reserved for the answer.
-   No gradients, no network, no external fonts. Numbers are the system
-   sans face with tabular figures, the way DeFiLlama sets its own table;
-   monospace survives only inside the formula, where it is honest. */
+/* Token Radar v5: neutral ink, DeFiLlama-style.
+   No amber, no gradients, no glass, no emoji icons.
+   Green/red ONLY for change percentages.
+   Focus rings are blue (standard accessibility colour).
+   Numbers in the same sans face, tabular-nums. */
 
 :root {
-  --bg: #101014;
-  --panel: #16161b;
-  --panel2: #1b1b21;
-  --line: #26262e;
-  --line-soft: #202028;
-  --text: #f2f2ee;
-  --muted: #c3c7ce;
-  --faint: #9ba0a8;
-  --amber: #e8a33d;
-  --green: #4ade80;
-  --red: #f87171;
-  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --bg:         #101014;
+  --panel:      #16161b;
+  --panel2:     #1b1b21;
+  --line:       #26262e;
+  --line-soft:  #202028;
+  --text:       #f4f4f5;
+  --muted:      #a1a1aa;
+  --faint:      #80808a;
+  --focus:      #60a5fa;
+  --green:      #4ade80;
+  --red:        #f87171;
+  --sans:       system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono:       ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -29,100 +30,108 @@ body {
   color: var(--text);
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.55;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   touch-action: manipulation;
 }
 
+/* Focus: blue outline on all interactive elements. */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 summary:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
+/* Skip link: accessibility affordance, hidden off-screen until focused. */
 .skip {
   position: absolute;
   left: 16px;
   top: -48px;
   z-index: 10;
   padding: 8px 12px;
-  background: var(--amber);
-  color: #101014;
+  background: var(--focus);
+  color: #fff;
   font-weight: 600;
   text-decoration: none;
+  border-radius: 2px;
 }
-
 .skip:focus { top: 8px; }
 
+/* ---- Header ---------------------------------------------------------- */
+
 .top {
-  padding: 24px 28px 18px;
+  padding: 16px 28px 14px;
   border-bottom: 1px solid var(--line);
 }
 
 h1 {
-  margin: 0 0 8px;
-  font-size: 28px;
-  line-height: 1.1;
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
   letter-spacing: -0.01em;
-  text-wrap: balance;
+  color: var(--text);
 }
 
 .lede {
   margin: 0;
   max-width: 900px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
-/* The five coverage figures as one quiet line, not a boxed rail:
-   label small and muted, value 15px semibold, no boxes, no borders,
-   no monospace. renderStats in app.js re-fills this same structure
-   with identical values, so nothing below shifts on load. */
+/* Stats: one quiet inline line, label and value side by side, separated
+   by a middot. No boxes, no strong/bold values, no large numbers. */
 .factsline {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 28px;
-  margin: 18px 0 0;
+  gap: 2px 20px;
+  margin: 10px 0 0;
   padding: 0;
-  min-height: 36px;
+  list-style: none;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.factsline div { padding: 0; }
+.factsline div { display: flex; align-items: baseline; gap: 5px; padding: 0; }
 
 .factsline dt {
   margin: 0;
   color: var(--faint);
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .factsline dd {
-  margin: 1px 0 0;
-  font-size: 15px;
-  font-weight: 600;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-/* The model: one readable line always visible, the full formula one
-   click away inside the details. The summary row is the label plus the
-   short form; the native marker is hidden and a + / - affordance
-   takes its place. */
+/* ---- Model details --------------------------------------------------- */
+
 .model {
   padding: 0 28px;
   border-bottom: 1px solid var(--line);
-  background: var(--panel);
 }
 
 .model summary {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 14px;
-  padding: 12px 0;
+  gap: 4px 12px;
+  padding: 10px 0;
   cursor: pointer;
   list-style: none;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .model summary::-webkit-details-marker { display: none; }
@@ -132,92 +141,91 @@ h1 {
   margin-left: auto;
   color: var(--faint);
   font-family: var(--mono);
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1;
 }
 
-.model[open ] summary::after { content: "\2212"; }
+.model[open] summary::after { content: "\2212"; }
 
 .model-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .formula-short {
   font-family: var(--mono);
-  font-size: 13px;
-  color: var(--muted);
+  font-size: 12px;
+  color: var(--faint);
 }
 
 .model .formula {
   margin: 0;
   max-width: 1100px;
   font-family: var(--mono);
-  font-size: 13px;
-  color: var(--text);
+  font-size: 12px;
+  color: var(--muted);
   overflow-wrap: anywhere;
 }
 
 .model .fine {
-  margin: 8px 0 14px;
+  margin: 6px 0 12px;
   max-width: 1100px;
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.6;
 }
+
+/* ---- Controls -------------------------------------------------------- */
 
 .controls {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 18px;
-  padding: 12px 28px;
+  gap: 6px 16px;
+  padding: 10px 28px;
   border-bottom: 1px solid var(--line);
 }
 
 .ctl {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 13px;
+  gap: 6px;
+  color: var(--faint);
+  font-size: 12px;
 }
 
 .ctl input,
 .ctl select {
-  padding: 8px 10px;
+  padding: 6px 9px;
   border: 1px solid var(--line);
   border-radius: 3px;
   background: var(--panel);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 14px;
-  min-width: 170px;
+  font-size: 13px;
+  min-width: 160px;
 }
 
-.ctl.search input { min-width: 220px; }
+.ctl.search input { min-width: 200px; }
 
 .ctl input:focus-visible,
 .ctl select:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--focus);
   outline-offset: 0;
-  border-color: var(--amber);
+  border-color: var(--focus);
 }
 
 .count {
   margin: 0 0 0 auto;
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--faint);
+  font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
-.proof {
-  margin: 12px 0 0;
-  padding-top: 10px;
-  border-top: 1px solid var(--line-soft);
-  color: var(--text);
-  font-size: 13px;
-}
+/* ---- Main layout ----------------------------------------------------- */
 
 main { padding: 0 28px 32px; }
 
@@ -228,20 +236,12 @@ main { padding: 0 28px 32px; }
   background: var(--panel);
 }
 
-/* The board's rows are rendered by JavaScript after the first paint, so
-   without a reserve the live section below jumps down by the board's
-   full height when they land (a ~0.23 layout shift on desktop). The
-   reserve holds the live section at its final place from the first
-   paint. The numbers are the measured rendered heights of the full
-   178-row board at the new 14px / 9px row size: 7281px at desktop
-   width, 11011px at phone width, where the narrower table wraps cell
-   text onto more lines. renderBoard in app.js clears the reserve in
-   the same task as it fills the rows, so filtering to fewer rows
-   never leaves a gap. The reserve is exact at the widths Lighthouse
-   audits (1350px desktop, 412px mobile); at in-between widths the
-   table height falls between the two values and a small shift can
-   remain. */
+/* Reserve for CLS prevention: holds the live section in place until JS
+   fills the rows. Numbers match the measured 14px/9px board height.
+   JS clears min-height once rows are written. */
 .boardwrap { min-height: 7281px; }
+
+/* ---- Board table ----------------------------------------------------- */
 
 table {
   width: 100%;
@@ -252,14 +252,16 @@ table {
 thead th {
   position: sticky;
   top: 0;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel2);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-align: left;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 thead th button {
@@ -271,10 +273,11 @@ thead th button {
   cursor: pointer;
 }
 
-thead th button:hover { color: var(--text); }
-thead th button::after { content: " \21C5"; color: var(--faint); }
-thead th.asc button::after { content: " \2191"; color: var(--amber); }
-thead th.desc button::after { content: " \2193"; color: var(--amber); }
+/* Sort arrows: neutral unsorted, white when active. */
+thead th button:hover { color: var(--muted); }
+thead th button::after { content: " \21C5"; color: var(--line); font-size: 10px; }
+thead th.asc  button::after { content: " \2191"; color: var(--text); }
+thead th.desc button::after { content: " \2193"; color: var(--text); }
 
 tbody td {
   padding: 9px 12px;
@@ -288,32 +291,51 @@ tbody tr {
 }
 
 tbody tr { cursor: pointer; }
-tbody tr:hover { background: var(--panel2); }
-tbody tr.selected { background: #241d10; }
-tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
 
+/* Selected row: a subtle white overlay — no coloured stripe. */
+tbody tr.selected { background: rgba(255,255,255,0.06); }
+
+/* Number cells: tabular, right-aligned, no-wrap. */
 .num {
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
 }
 
-/* Amber has one job in the table: the implied value, the answer the
-   board exists to show. Rank, dots, badges and bars are gone. */
-.num.implied { color: var(--amber); }
+/* Implied value: bold white. Position + weight create the emphasis. */
+.num.implied { font-weight: 700; color: var(--text); }
 
-.rank { font-weight: 600; font-variant-numeric: tabular-nums; }
+.rank {
+  font-variant-numeric: tabular-nums;
+  color: var(--faint);
+  font-size: 13px;
+}
+
 .name { font-weight: 600; }
-.namelink { color: inherit; text-decoration: none; }
-.namelink:hover { color: var(--amber); text-decoration: underline; }
-.cat { color: var(--muted); white-space: nowrap; }
-.chains { color: var(--muted); }
-.pos { color: var(--green); }
-.neg { color: var(--red); }
+
+.namelink {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.namelink:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cat   { color: var(--muted); white-space: nowrap; }
+.chains { color: var(--muted); font-size: 13px; }
+
+/* Green/red ONLY for 7d change numbers. */
+.pos  { color: var(--green); }
+.neg  { color: var(--red); }
 .flat { color: var(--muted); }
 
+/* ---- Detail panel ---------------------------------------------------- */
+
 .detail {
-  margin: 22px 0 8px;
+  margin: 20px 0 8px;
   border: 1px solid var(--line);
   background: var(--panel);
 }
@@ -322,14 +344,31 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 10px;
-  padding: 16px 20px 12px;
+  gap: 8px;
+  padding: 14px 20px 10px;
   border-bottom: 1px solid var(--line);
 }
 
-.detail .d-head h2 { margin: 0; font-size: 22px; letter-spacing: -0.01em; }
-.detail .d-head .d-rank { font-weight: 700; }
-.detail .d-head .d-meta { color: var(--muted); font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
+.detail .d-head h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.detail .d-head .d-rank {
+  color: var(--faint);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail .d-head .d-meta {
+  color: var(--muted);
+  font-size: 13px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 
 .detail .d-close {
   margin-left: auto;
@@ -342,72 +381,107 @@ tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
   cursor: pointer;
 }
 
-.detail .d-close:hover { color: var(--amber); border-color: var(--amber); }
+.detail .d-close:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
 
+/* Detail body: 4/6 split avoids the squished left column. */
 .detail .d-grid {
   display: grid;
-  grid-template-columns: 5fr 7fr;
+  grid-template-columns: 4fr 6fr;
   gap: 0;
 }
 
-.detail .d-col { padding: 18px 22px; min-width: 0; }
+.detail .d-col { padding: 16px 20px; min-width: 0; }
 .detail .d-col + .d-col { border-left: 1px solid var(--line); }
 
 .detail h3 {
   margin: 0 0 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.facts { width: 100%; font-size: 14px; }
+/* Facts table in detail: clean label / value pairs. */
+.facts { width: 100%; font-size: 14px; border-collapse: collapse; }
 .facts tr { border-bottom: 1px solid var(--line-soft); }
 .facts td { padding: 7px 0; }
-.facts td:first-child { color: var(--muted); width: 46%; }
-.facts td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+.facts td:first-child { color: var(--muted); width: 50%; }
+.facts td:last-child  { text-align: right; font-variant-numeric: tabular-nums; }
 
-.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+/* Proof line: smaller and muted, below the facts table. */
+.proof {
+  margin: 10px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--faint);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Farm plan steps: numbered with CSS counter. */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
 .steps li {
   position: relative;
-  padding: 0 0 14px 32px;
+  padding: 0 0 14px 30px;
   counter-increment: step;
+  font-size: 14px;
 }
+
 .steps li::before {
   content: counter(step);
   position: absolute;
   left: 0;
-  top: 1px;
-  width: 20px;
-  height: 20px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
   border: 1px solid var(--line);
   border-radius: 50%;
-  color: var(--text);
-  font-size: 12px;
-  line-height: 19px;
+  color: var(--faint);
+  font-size: 11px;
+  line-height: 17px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
-.steps p { margin: 0 0 4px; }
-.costline { margin: 0; color: var(--muted); font-size: 13px; }
-.totals { margin: 12px 0 0; color: var(--text); font-size: 14px; font-weight: 600; }
 
-.live { margin-top: 34px; }
-.live h2 { margin: 0 0 4px; font-size: 20px; }
-.live p { margin: 0 0 14px; color: var(--muted); }
+.steps p { margin: 0 0 3px; }
+.costline { margin: 0; color: var(--muted); font-size: 12px; }
+.totals   { margin: 12px 0 0; color: var(--text); font-size: 14px; font-weight: 600; }
+
+/* ---- Already trading section ----------------------------------------- */
+
+.live { margin-top: 32px; }
+.live h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+.live p  { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
 .live .tablewrap { border-top: 1px solid var(--line); }
 .live tbody tr { cursor: default; }
 
+/* ---- Footer ---------------------------------------------------------- */
+
 footer {
-  padding: 18px 28px 30px;
+  padding: 16px 28px 28px;
   border-top: 1px solid var(--line);
   color: var(--faint);
-  font-size: 13px;
+  font-size: 12px;
 }
 
-footer p { margin: 0; max-width: 860px; }
+footer p { margin: 0; max-width: 860px; line-height: 1.6; }
+footer p + p { margin-top: 4px; }
+
+/* ---- Responsive ------------------------------------------------------- */
 
 @media (max-width: 760px) {
   .top, .model, .controls, main { padding-left: 16px; padding-right: 16px; }
-  h1 { font-size: 28px; }
+  h1 { font-size: 18px; }
   .detail .d-grid { grid-template-columns: 1fr; }
   .detail .d-col + .d-col { border-left: 0; border-top: 1px solid var(--line); }
   .boardwrap { min-height: 11011px; }

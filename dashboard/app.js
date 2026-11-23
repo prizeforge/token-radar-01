@@ -313,8 +313,8 @@
       // No dot, no badge, no bar, no slug: every board row records no
       // token by definition, the board data still carries the watchlist
       // flags, and the sorted order already ranks by eye. The row is
-      // the name, its category, its chains and its numbers; the amber
-      // implied value is the one signal.
+      // the name, its category, its chains and its numbers; the bold
+      // implied value (rightmost) is the one structural signal.
       return '<tr data-slug="' + esc(r.slug) + '"' + cls + '>' +
         '<td class="rank">' + r.rank + '</td>' +
         '<td><a class="name namelink" href="#' + hashParts(r.slug) + '">' + esc(r.name) + '</a></td>' +
