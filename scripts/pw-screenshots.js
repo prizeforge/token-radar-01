@@ -6,7 +6,7 @@ const { chromium } = require('/home/hatch/.npm/_npx/705bc6b22212b352/node_module
 
 const CHROME = process.env.HOME + '/.cache/ms-playwright/chromium-1255/chrome-linux64/chrome';
 const ROOT = path.resolve(__dirname, '..');
-const DASH = 'file://' + ROOT + '/out_v5a/dashboard/index.html';
+const DASH = 'file://' + ROOT + '/out/dashboard/index.html';
 
 async function run() {
   const browser = await chromium.launch({
