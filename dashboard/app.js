@@ -282,8 +282,6 @@
 
   function isWatchlist(r) { return !!wl[r.slug]; }
 
-  var maxImplied = R.rows.length ? R.rows[0].implied_value_usd : 1;
-
   function filtered() {
     var q = state.q.trim().toLowerCase();
     var out = R.rows.filter(function (r) {
@@ -312,21 +310,20 @@
     $('count').textContent = list.length + ' of ' + R.rows.length + ' rows';
     rowsEl.innerHTML = list.map(function (r) {
       var cls = r.slug === selected ? ' class="selected"' : '';
-      // Value bar: linear against the top row's implied value, so the
-      // eye can rank the board without reading a single number.
-      var share = Math.max(1, Math.round((r.implied_value_usd / maxImplied) * 100));
+      // No dot, no badge, no bar, no slug: every board row records no
+      // token by definition, the board data still carries the watchlist
+      // flags, and the sorted order already ranks by eye. The row is
+      // the name, its category, its chains and its numbers; the amber
+      // implied value is the one signal.
       return '<tr data-slug="' + esc(r.slug) + '"' + cls + '>' +
         '<td class="rank">' + r.rank + '</td>' +
-        '<td><span class="notoken" title="No token recorded"></span><a class="name namelink" href="#' + hashParts(r.slug) + '">' + esc(r.name) + '</a>' +
-        '<span class="slug">' + esc(r.slug) + '</span>' +
-        (isWatchlist(r) ? '<span class="tag">Watchlist</span>' : '') + '</td>' +
+        '<td><a class="name namelink" href="#' + hashParts(r.slug) + '">' + esc(r.name) + '</a></td>' +
         '<td class="cat">' + esc(r.category || '—') + '</td>' +
         '<td class="chains">' + esc((r.chains || []).slice(0, 3).join(', ') || '—') + '</td>' +
         '<td class="num">' + fmtUSD(r.tvl_usd) + '</td>' +
         '<td class="num ' + pctClass(r.change_7d) + '">' + fmtPct(r.change_7d) + '</td>' +
         '<td class="num">' + fmtAge(r.age_days) + '</td>' +
-        '<td class="barcell"><span class="bar"><i style="width:' + share + '%"></i></span></td>' +
-        '<td class="num"><strong>' + fmtUSD(r.implied_value_usd) + '</strong></td>' +
+        '<td class="num implied"><strong>' + fmtUSD(r.implied_value_usd) + '</strong></td>' +
         '</tr>';
     }).join('');
     // The CSS reserve held the live section in place before the rows
@@ -365,14 +362,17 @@
       : 'Generated here from the row\u2019s own category, chains, TVL and age, but it does NOT match the plan board.json carries.';
     var steps = generated.map(function (s) {
       var p = splitStep(s);
-      var chips = '';
-      if (p.cost) chips += '<span class="chip">Cost: ' + esc(p.cost) + '</span>';
-      if (p.time) chips += '<span class="chip">Time: ' + esc(p.time) + '</span>';
-      return '<li><p>' + esc(p.action) + '</p><div class="chips">' + chips + '</div></li>';
+      // Cost and time as one plain line, not two boxed chips: twelve
+      // boxes in one panel was noise, the words are the information.
+      var costline = '';
+      if (p.cost && p.time) costline = '<p class="costline">Cost: ' + esc(p.cost) + ' &middot; Time: ' + esc(p.time) + '</p>';
+      else if (p.cost) costline = '<p class="costline">Cost: ' + esc(p.cost) + '</p>';
+      else if (p.time) costline = '<p class="costline">Time: ' + esc(p.time) + '</p>';
+      return '<li><p>' + esc(p.action) + '</p>' + costline + '</li>';
     }).join('');
     detailEl.innerHTML =
       '<div class="d-head"><span class="d-rank">#' + r.rank + '</span><h2>' + esc(r.name) + '</h2>' +
-      '<span class="d-meta">' + esc(r.slug) + ', ' + esc(r.category || 'uncategorised') + ', ' + esc((r.chains || []).join(', ') || 'no chain listed') + '</span>' +
+      '<span class="d-meta">' + esc(r.slug) + ', ' + esc(r.category || 'uncategorised') + ', ' + (r.chains || []).length + ' chains</span>' +
       '<button type="button" class="d-close">Close</button></div>' +
       '<div class="d-grid"><div class="d-col"><h3>Model breakdown</h3><table class="facts">' +
       '<tr><td>TVL</td><td>' + fmtUSD(r.tvl_usd) + '</td></tr>' +
@@ -400,7 +400,7 @@
   function renderLive() {
     $('liverows').innerHTML = R.live.map(function (p) {
       var ratio = (p.mcap_usd && p.tvl_usd) ? (p.mcap_usd / p.tvl_usd).toFixed(2) + 'x' : '—';
-      return '<tr><td><span class="name">' + esc(p.name) + '</span><span class="slug">' + esc(p.slug) + '</span></td>' +
+      return '<tr><td><span class="name">' + esc(p.name) + '</span></td>' +
         '<td class="cat">' + esc(p.category || '—') + '</td>' +
         '<td class="chains">' + esc((p.chains || []).slice(0, 3).join(', ') || '—') + '</td>' +
         '<td class="num">' + fmtUSD(p.tvl_usd) + '</td>' +
