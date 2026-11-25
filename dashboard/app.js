@@ -547,7 +547,16 @@
     var goBtn = ev.target.closest('[data-go]');
     if (goBtn && !goBtn.disabled) {
       var goSlug = goBtn.getAttribute('data-go');
-      if (goSlug) { renderDetail(goSlug); setHash(); }
+      var wasPrev = !!ev.target.closest('#d-prev');
+      if (goSlug) {
+        renderDetail(goSlug);
+        setHash();
+        // renderDetail rebuilds the detail buttons, so the focused button is
+        // destroyed: move focus to its replacement (or Close if disabled).
+        var nb = $(wasPrev ? 'd-prev' : 'd-next');
+        if (nb && !nb.disabled) nb.focus();
+        else { var cb = $('d-close'); if (cb) cb.focus(); }
+      }
     }
   });
 
@@ -558,6 +567,10 @@
     renderDetail(slug);
     setHash();
     detailEl.scrollIntoView({ block: 'nearest' });
+    // Keyboard-activated (Enter/Space fires click with detail === 0): the
+    // detail sits above the board in DOM order, so move focus into it;
+    // otherwise forward Tab from the mover row would skip the detail buttons.
+    if (ev.detail === 0) { var cb = $('d-close'); if (cb) cb.focus(); }
   });
 
   function toggleSort(th) {
@@ -650,6 +663,10 @@
       if (tr) {
         ev.preventDefault();
         toggleRow(tr.getAttribute('data-slug'));
+        // Detail sits above the board in DOM order: when it opens from the
+        // keyboard, move focus into it (Close), so forward Tab reaches the
+        // detail buttons instead of skipping them.
+        if (!detailEl.hidden) { var cb = $('d-close'); if (cb) cb.focus(); }
       }
     }
   });

@@ -334,10 +334,11 @@ h1 {
   padding: 2px 5px;
 }
 .clear-q:hover { color: var(--amber); }
+.clear-q:focus-visible { outline: 2px solid var(--amber); outline-offset: 1px; }
 
 .ctl input:focus,
 .ctl select:focus {
-  outline: 2px solid var(--amber-dim);
+  outline: 2px solid var(--amber);
   outline-offset: 0;
   border-color: var(--amber);
 }
@@ -362,6 +363,7 @@ h1 {
 }
 
 .pill:hover { border-color: var(--amber-dim); color: var(--text); }
+.pill:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .pill.active {
   border-color: var(--amber);
   background: var(--amber-tint);
@@ -480,7 +482,8 @@ thead th {
 #board tbody tr.wl:hover td:first-child { background: var(--wl-hover); }
 
 th[data-sort] { cursor: pointer; }
-th[data-sort]:hover, th[data-sort]:focus-visible { color: var(--amber); outline: none; }
+th[data-sort]:hover, th[data-sort]:focus-visible { color: var(--amber); }
+th[data-sort]:focus-visible { outline: 2px solid var(--amber); outline-offset: -2px; }
 th[data-sort]::after { content: " \21C5"; color: var(--faint); }
 th[data-sort].asc, th[data-sort].desc { color: var(--amber); }
 th[data-sort].asc::after { content: " \2191"; color: var(--amber); }
@@ -580,6 +583,7 @@ tbody tr.kb-focus, tbody tr:focus-visible {
 }
 
 .d-btn:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+.d-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 .d-btn:disabled { opacity: 0.4; cursor: default; }
 .d-btn.d-close { border-color: var(--amber-dim); color: var(--amber); }
 
