@@ -28,7 +28,6 @@
   var $ = function (id) { return document.getElementById(id); };
   var rowsEl = $('rows');
   var detailEl = $('detail');
-  var boardWrap = document.querySelector('.boardwrap');
 
   /** $2,754,000,000 -> $2.75B, $154,313,682 -> $154.3M, $48,967,055 -> $49.0M. */
   function fmtUSD(n) {
@@ -207,20 +206,6 @@
     ];
   }
 
-  /** The plan's size in one line, from the same numbers the steps use:
-      capital across both positions, gas for the first transaction, the
-      set-up and the second leg plus $2 a week over the hold, and the hold
-      itself. A view summary only; it is not part of farm_steps. */
-  function planTotals(r) {
-    var capital = capitalFor(r);
-    var hold = holdDaysFor(r.age_days);
-    var gas = capital >= 150 ? 8 : 4;
-    var small = Math.max(10, Math.round(capital / 5));
-    var weeks = Math.ceil(hold / 7);
-    var gasTotal = 3 + gas + 2 * weeks + gas;
-    return 'Plan total: $' + (capital + small) + ' of capital, about $' + gasTotal + ' of gas, over at least ' + hold + ' days.';
-  }
-
   // ---- The whole-board check, for the page and for tests ---------------
   //
   // Recomputes every row's implied value and regenerates every row's
@@ -282,6 +267,8 @@
 
   function isWatchlist(r) { return !!wl[r.slug]; }
 
+  var maxImplied = R.rows.length ? R.rows[0].implied_value_usd : 1;
+
   function filtered() {
     var q = state.q.trim().toLowerCase();
     var out = R.rows.filter(function (r) {
@@ -310,28 +297,23 @@
     $('count').textContent = list.length + ' of ' + R.rows.length + ' rows';
     rowsEl.innerHTML = list.map(function (r) {
       var cls = r.slug === selected ? ' class="selected"' : '';
-      // No dot, no badge, no bar, no slug: every board row records no
-      // token by definition, the board data still carries the watchlist
-      // flags, and the sorted order already ranks by eye. The row is
-      // the name, its category, its chains and its numbers; the bold
-      // implied value (rightmost) is the one structural signal.
+      // Value bar: linear against the top row's implied value, so the
+      // eye can rank the board without reading a single number.
+      var share = Math.max(1, Math.round((r.implied_value_usd / maxImplied) * 100));
       return '<tr data-slug="' + esc(r.slug) + '"' + cls + '>' +
         '<td class="rank">' + r.rank + '</td>' +
-        '<td><a class="name namelink" href="#' + hashParts(r.slug) + '">' + esc(r.name) + '</a></td>' +
+        '<td><span class="notoken" title="No token recorded"></span><span class="name">' + esc(r.name) + '</span>' +
+        (isWatchlist(r) ? '<span class="tag">Watchlist</span>' : '') +
+        '<span class="slug">' + esc(r.slug) + '</span></td>' +
         '<td class="cat">' + esc(r.category || '—') + '</td>' +
         '<td class="chains">' + esc((r.chains || []).slice(0, 3).join(', ') || '—') + '</td>' +
         '<td class="num">' + fmtUSD(r.tvl_usd) + '</td>' +
         '<td class="num ' + pctClass(r.change_7d) + '">' + fmtPct(r.change_7d) + '</td>' +
         '<td class="num">' + fmtAge(r.age_days) + '</td>' +
-        '<td class="num implied"><strong>' + fmtUSD(r.implied_value_usd) + '</strong></td>' +
+        '<td class="barcell"><span class="bar"><i style="width:' + share + '%"></i></span></td>' +
+        '<td class="num"><strong>' + fmtUSD(r.implied_value_usd) + '</strong></td>' +
         '</tr>';
     }).join('');
-    // The CSS reserve held the live section in place before the rows
-    // existed. The rows are in now, in the same task, so drop the
-    // reserve before anything paints: from here the wrap's height is
-    // the table's own, and filtering to fewer rows shrinks it instead
-    // of leaving a gap.
-    if (boardWrap) boardWrap.style.minHeight = '0';
     document.querySelectorAll('#board th[data-sort]').forEach(function (th) {
       th.classList.remove('asc', 'desc');
       th.removeAttribute('aria-sort');
@@ -362,18 +344,14 @@
       : 'Generated here from the row\u2019s own category, chains, TVL and age, but it does NOT match the plan board.json carries.';
     var steps = generated.map(function (s) {
       var p = splitStep(s);
-      // Cost and time as one plain line, not two boxed chips: twelve
-      // boxes in one panel was noise, the words are the information.
-      var costline = '';
-      if (p.cost && p.time) costline = '<p class="costline">Cost: ' + esc(p.cost) + ' &middot; Time: ' + esc(p.time) + '</p>';
-      else if (p.cost) costline = '<p class="costline">Cost: ' + esc(p.cost) + '</p>';
-      else if (p.time) costline = '<p class="costline">Time: ' + esc(p.time) + '</p>';
-      return '<li><p>' + esc(p.action) + '</p>' + costline + '</li>';
+      var chips = '';
+      if (p.cost) chips += '<span class="chip">Cost: ' + esc(p.cost) + '</span>';
+      if (p.time) chips += '<span class="chip">Time: ' + esc(p.time) + '</span>';
+      return '<li><p>' + esc(p.action) + '</p><div class="chips">' + chips + '</div></li>';
     }).join('');
     detailEl.innerHTML =
       '<div class="d-head"><span class="d-rank">#' + r.rank + '</span><h2>' + esc(r.name) + '</h2>' +
-      '<span class="d-meta">' + esc(r.slug) + ', ' + esc(r.category || 'uncategorised') + ', ' + (r.chains || []).length + ' chains</span>' +
-      '<button type="button" class="d-close">Close</button></div>' +
+      '<span class="d-meta">' + esc(r.slug) + ' &middot; ' + esc(r.category || 'uncategorised') + ' &middot; ' + esc((r.chains || []).join(', ') || 'no chain listed') + '</span></div>' +
       '<div class="d-grid"><div class="d-col"><h3>Model breakdown</h3><table class="facts">' +
       '<tr><td>TVL</td><td>' + fmtUSD(r.tvl_usd) + '</td></tr>' +
       '<tr><td>Base: TVL &times; ' + R.model.base_multiple + '</td><td>' + fmtUSD(v.base) + '</td></tr>' +
@@ -384,23 +362,15 @@
       '<tr><td>Chains (' + (r.chains || []).length + ')</td><td>&times;' + v.breadthMult.toFixed(2) + '</td></tr>' +
       '<tr><td><strong>Implied value</strong></td><td><strong>' + fmtUSD(v.implied) + '</strong></td></tr>' +
       '</table><p class="proof">' + esc(valueProof) + '</p></div>' +
-      '<div class="d-col"><h3>Farm plan</h3><ol class="steps">' + steps + '</ol><p class="totals">' + esc(planTotals(r)) + '</p><p class="proof">' + esc(planProof) + '</p></div></div>';
+      '<div class="d-col"><h3>Farm plan</h3><ol class="steps">' + steps + '</ol><p class="proof">' + esc(planProof) + '</p></div></div>';
     detailEl.hidden = false;
-    detailEl.querySelector('.d-close').addEventListener('click', function () {
-      selected = null;
-      detailEl.hidden = true;
-      renderBoard();
-      setHash();
-      var link = document.querySelector('tr[data-slug="' + slug + '"] .namelink');
-      if (link) link.focus();
-    });
     renderBoard();
   }
 
   function renderLive() {
     $('liverows').innerHTML = R.live.map(function (p) {
       var ratio = (p.mcap_usd && p.tvl_usd) ? (p.mcap_usd / p.tvl_usd).toFixed(2) + 'x' : '—';
-      return '<tr><td><span class="name">' + esc(p.name) + '</span></td>' +
+      return '<tr><td><span class="name">' + esc(p.name) + '</span><span class="slug">' + esc(p.slug) + '</span></td>' +
         '<td class="cat">' + esc(p.category || '—') + '</td>' +
         '<td class="chains">' + esc((p.chains || []).slice(0, 3).join(', ') || '—') + '</td>' +
         '<td class="num">' + fmtUSD(p.tvl_usd) + '</td>' +
@@ -425,21 +395,14 @@
     $('footrows').textContent = R.board_size + ' ranked rows, ' + R.watchlist_size + ' on the watchlist and ' + R.early_size + ' early ones below the floor';
   }
 
-  /** The hash for a view: the detail slug first, then the filters in
-      force, so a link to a row never wipes the filters. */
-  function hashParts(slug) {
+  function setHash() {
     var parts = [];
-    if (slug) parts.push('detail=' + encodeURIComponent(slug));
+    if (selected) parts.push('detail=' + encodeURIComponent(selected));
     if (state.q) parts.push('q=' + encodeURIComponent(state.q));
     if (state.cat !== 'all') parts.push('cat=' + encodeURIComponent(state.cat));
     if (state.scope !== 'all') parts.push('scope=' + state.scope);
     if (state.chain !== 'all') parts.push('chain=' + encodeURIComponent(state.chain));
-    return parts.join('&');
-  }
-
-  function setHash() {
-    var h = hashParts(selected);
-    history.replaceState(null, '', h ? '#' + h : '#');
+    history.replaceState(null, '', parts.length ? '#' + parts.join('&') : '#');
   }
 
   function readHash() {
@@ -458,9 +421,6 @@
   }
 
   rowsEl.addEventListener('click', function (ev) {
-    // A click on the name link lets the hash navigation open the detail;
-    // the row handler must not also toggle it shut.
-    if (ev.target.closest('a')) return;
     var tr = ev.target.closest('tr[data-slug]');
     if (!tr) return;
     var slug = tr.getAttribute('data-slug');
@@ -470,9 +430,9 @@
     detailEl.scrollIntoView({ block: 'nearest' });
   });
 
-  document.querySelectorAll('#board th[data-sort] button').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var key = btn.parentElement.getAttribute('data-sort');
+  document.querySelectorAll('#board th[data-sort]').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.getAttribute('data-sort');
       if (state.sort === key) { state.dir = -state.dir; } else { state.sort = key; state.dir = key === 'name' || key === 'category' ? 1 : -1; }
       renderBoard();
     });

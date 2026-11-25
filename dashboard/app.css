@@ -1,28 +1,26 @@
-/* Token Radar v5: neutral ink, DeFiLlama-style.
-   No amber, no gradients, no glass, no emoji icons.
-   Green/red ONLY for change percentages.
-   Focus rings are blue (standard accessibility colour).
-   Numbers in the same sans face, tabular-nums. */
+/* Token Radar dashboard: flat ink, amber signal, no gradients, no network. */
 
 :root {
-  --bg:         #101014;
-  --panel:      #16161b;
-  --panel2:     #1b1b21;
-  --line:       #26262e;
-  --line-soft:  #202028;
-  --text:       #f4f4f5;
-  --muted:      #a1a1aa;
-  --faint:      #80808a;
-  --focus:      #60a5fa;
-  --green:      #4ade80;
-  --red:        #f87171;
-  --sans:       system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono:       ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --bg: #0f0f12;
+  --panel: #17171d;
+  --panel2: #1d1d24;
+  --line: #2a2a33;
+  --line-soft: #22222b;
+  --text: #edede6;
+  --muted: #9a9aa5;
+  --faint: #b0b4bd;
+  --amber: #e8a33d;
+  --amber-dim: #8a6420;
+  --green: #4ade80;
+  --red: #f87171;
+  --sky: #7dd3fc;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 * { box-sizing: border-box; }
 
-html { background: var(--bg); color-scheme: dark; }
+html { background: var(--bg); }
 
 body {
   margin: 0;
@@ -32,200 +30,194 @@ body {
   font-size: 15px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  touch-action: manipulation;
 }
-
-/* Focus: blue outline on all interactive elements. */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-summary:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
-
-/* Skip link: accessibility affordance, hidden off-screen until focused. */
-.skip {
-  position: absolute;
-  left: 16px;
-  top: -48px;
-  z-index: 10;
-  padding: 8px 12px;
-  background: var(--focus);
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  border-radius: 2px;
-}
-.skip:focus { top: 8px; }
-
-/* ---- Header ---------------------------------------------------------- */
 
 .top {
-  padding: 16px 28px 14px;
+  padding: 22px 28px 14px;
   border-bottom: 1px solid var(--line);
+}
+
+.kicker {
+  margin: 0 0 8px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 h1 {
   margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
 }
 
 .lede {
   margin: 0;
   max-width: 900px;
   color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 15px;
 }
 
-/* Stats: one quiet inline line, label and value side by side, separated
-   by a middot. No boxes, no strong/bold values, no large numbers. */
-.factsline {
+.stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 2px 20px;
-  margin: 10px 0 0;
+  gap: 0;
+  margin: 16px 0 0;
   padding: 0;
-  list-style: none;
-  font-size: 13px;
-  color: var(--muted);
+  border: 1px solid var(--line);
+  background: var(--panel);
 }
 
-.factsline div { display: flex; align-items: baseline; gap: 5px; padding: 0; }
+.stats div {
+  padding: 10px 18px;
+  border-right: 1px solid var(--line);
+  min-width: 130px;
+}
 
-.factsline dt {
+.stats div:last-child { border-right: 0; }
+
+.stats dt {
   margin: 0;
   color: var(--faint);
-  font-size: 12px;
-  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.factsline dd {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.stats dd {
+  margin: 2px 0 0;
+  font-family: var(--mono);
+  font-size: 19px;
+  font-weight: 600;
 }
-
-/* ---- Model details --------------------------------------------------- */
 
 .model {
-  padding: 0 28px;
+  padding: 12px 28px;
   border-bottom: 1px solid var(--line);
+  background: var(--panel);
 }
 
-.model summary {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  padding: 10px 0;
-  cursor: pointer;
-  list-style: none;
-  color: var(--muted);
+.model h2 {
+  margin: 0 0 4px;
   font-size: 13px;
-}
-
-.model summary::-webkit-details-marker { display: none; }
-
-.model summary::after {
-  content: "+";
-  margin-left: auto;
-  color: var(--faint);
-  font-family: var(--mono);
-  font-size: 15px;
-  line-height: 1;
-}
-
-.model[open] summary::after { content: "\2212"; }
-
-.model-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--muted);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--amber);
 }
 
-.formula-short {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--faint);
+.model p {
+  margin: 0;
+  max-width: 1100px;
+  color: var(--text);
 }
 
 .model .formula {
-  margin: 0;
-  max-width: 1100px;
+  max-width: none;
   font-family: var(--mono);
-  font-size: 12px;
-  color: var(--muted);
+  font-size: 13px;
+  color: var(--text);
   overflow-wrap: anywhere;
 }
 
 .model .fine {
-  margin: 6px 0 12px;
-  max-width: 1100px;
-  color: var(--faint);
-  font-size: 12px;
-  line-height: 1.6;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
 }
-
-/* ---- Controls -------------------------------------------------------- */
 
 .controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 6px 16px;
-  padding: 10px 28px;
+  align-items: flex-end;
+  gap: 14px;
+  padding: 12px 28px;
   border-bottom: 1px solid var(--line);
 }
 
 .ctl {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  flex-direction: column;
+  gap: 5px;
   color: var(--faint);
-  font-size: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
 .ctl input,
 .ctl select {
-  padding: 6px 9px;
+  padding: 8px 10px;
   border: 1px solid var(--line);
   border-radius: 3px;
   background: var(--panel);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 13px;
-  min-width: 160px;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+  min-width: 170px;
 }
 
-.ctl.search input { min-width: 200px; }
+.ctl.search input { min-width: 230px; }
 
-.ctl input:focus-visible,
-.ctl select:focus-visible {
-  outline: 2px solid var(--focus);
+.ctl input:focus,
+.ctl select:focus {
+  outline: 2px solid var(--amber-dim);
   outline-offset: 0;
-  border-color: var(--focus);
+  border-color: var(--amber);
 }
 
 .count {
-  margin: 0 0 0 auto;
-  color: var(--faint);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
+  margin: 0 0 9px auto;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 13px;
 }
 
-/* ---- Main layout ----------------------------------------------------- */
+.legend {
+  margin: 0 0 9px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.notoken {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--amber);
+  margin-right: 6px;
+  vertical-align: 1px;
+}
+
+.barcell { width: 90px; min-width: 70px; }
+
+.bar {
+  display: block;
+  height: 8px;
+  background: var(--panel2);
+  border: 1px solid var(--line);
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--amber);
+}
+
+.proof {
+  margin: 12px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-soft);
+  color: var(--amber);
+  font-size: 13px;
+}
 
 main { padding: 0 28px 32px; }
 
@@ -236,12 +228,17 @@ main { padding: 0 28px 32px; }
   background: var(--panel);
 }
 
-/* Reserve for CLS prevention: holds the live section in place until JS
-   fills the rows. Numbers match the measured 14px/9px board height.
-   JS clears min-height once rows are written. */
-.boardwrap { min-height: 7281px; }
+/* Reserve the board's full rendered height (178 rows) so the live section
+   and footer below it do not shift down when the rows render. Measured
+   9740px at 1350px wide, 13604px at 412px wide; if the row count or row
+   height ever changes, re-measure and update both numbers. */
+.boardwrap { min-height: 9740px; }
 
-/* ---- Board table ----------------------------------------------------- */
+/* Rows outside the viewport skip layout and paint until scrolled into
+   view; the board still renders the same rows, and the wrapper's
+   min-height above keeps the page height fixed. This only cuts the
+   first-paint layout cost of 178 two-line rows (measured row ~55px). */
+#rows tr, #liverows tr { content-visibility: auto; contain-intrinsic-size: auto 55px; }
 
 table {
   width: 100%;
@@ -249,94 +246,73 @@ table {
   font-size: 14px;
 }
 
+/* No position: sticky here: a sticky header inside the 9740px board
+   wrapper cost ~500ms of first paint in Lighthouse (the compositor work
+   for a sticky element in a very tall scroll container), and the header
+   is visible at the top of the board in every screenshot either way. */
 thead th {
-  position: sticky;
-  top: 0;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--line);
   background: var(--panel2);
   color: var(--muted);
+  font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   text-align: left;
   white-space: nowrap;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
-thead th button {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-}
-
-/* Sort arrows: neutral unsorted, white when active. */
-thead th button:hover { color: var(--muted); }
-thead th button::after { content: " \21C5"; color: var(--line); font-size: 10px; }
-thead th.asc  button::after { content: " \2191"; color: var(--text); }
-thead th.desc button::after { content: " \2193"; color: var(--text); }
+th[data-sort] { cursor: pointer; }
+th[data-sort]:hover { color: var(--amber); }
+th[data-sort]::after { content: " \21C5"; color: var(--faint); }
+th[data-sort].asc::after { content: " \2191"; color: var(--amber); }
+th[data-sort].desc::after { content: " \2193"; color: var(--amber); }
 
 tbody td {
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--line-soft);
   vertical-align: middle;
 }
 
-tbody tr {
-  content-visibility: auto;
-  contain-intrinsic-size: 40px;
-}
-
 tbody tr { cursor: pointer; }
-tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody tr:hover { background: var(--panel2); }
+tbody tr.selected { background: #241d10; }
+tbody tr.selected td:first-child { box-shadow: inset 3px 0 0 var(--amber); }
 
-/* Selected row: a subtle white overlay — no coloured stripe. */
-tbody tr.selected { background: rgba(255,255,255,0.06); }
-
-/* Number cells: tabular, right-aligned, no-wrap. */
 .num {
+  font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   text-align: right;
   white-space: nowrap;
 }
 
-/* Implied value: bold white. Position + weight create the emphasis. */
-.num.implied { font-weight: 700; color: var(--text); }
-
-.rank {
-  font-variant-numeric: tabular-nums;
-  color: var(--faint);
-  font-size: 13px;
-}
-
+.rank { font-family: var(--mono); font-weight: 700; color: var(--amber); }
 .name { font-weight: 600; }
-
-.namelink {
-  color: var(--text);
-  text-decoration: none;
-}
-
-.namelink:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.cat   { color: var(--muted); white-space: nowrap; }
+.slug { display: block; color: var(--faint); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+.cat { color: var(--muted); white-space: nowrap; }
 .chains { color: var(--muted); font-size: 13px; }
-
-/* Green/red ONLY for 7d change numbers. */
-.pos  { color: var(--green); }
-.neg  { color: var(--red); }
+.pos { color: var(--green); }
+.neg { color: var(--red); }
 .flat { color: var(--muted); }
-
-/* ---- Detail panel ---------------------------------------------------- */
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 2px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-left: 6px;
+  vertical-align: 1px;
+}
 
 .detail {
-  margin: 20px 0 8px;
-  border: 1px solid var(--line);
+  margin: 22px 0 8px;
+  border: 1px solid var(--amber-dim);
   background: var(--panel);
 }
 
@@ -344,52 +320,18 @@ tbody tr.selected { background: rgba(255,255,255,0.06); }
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 8px;
-  padding: 14px 20px 10px;
+  gap: 10px;
+  padding: 16px 20px 12px;
   border-bottom: 1px solid var(--line);
 }
 
-.detail .d-head h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
+.detail .d-head h2 { margin: 0; font-size: 24px; letter-spacing: -0.01em; }
+.detail .d-head .d-rank { font-family: var(--mono); color: var(--amber); font-weight: 700; }
+.detail .d-head .d-meta { color: var(--muted); font-size: 13px; min-width: 0; overflow-wrap: anywhere; }
 
-.detail .d-head .d-rank {
-  color: var(--faint);
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.detail .d-head .d-meta {
-  color: var(--muted);
-  font-size: 13px;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.detail .d-close {
-  margin-left: auto;
-  padding: 4px 10px;
-  border: 1px solid var(--line);
-  border-radius: 2px;
-  background: var(--panel2);
-  color: var(--muted);
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.detail .d-close:hover {
-  color: var(--text);
-  border-color: var(--muted);
-}
-
-/* Detail body: 4/6 split avoids the squished left column. */
 .detail .d-grid {
   display: grid;
-  grid-template-columns: 4fr 6fr;
+  grid-template-columns: 1fr 1fr;
   gap: 0;
 }
 
@@ -398,91 +340,71 @@ tbody tr.selected { background: rgba(255,255,255,0.06); }
 
 .detail h3 {
   margin: 0 0 10px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--faint);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* Facts table in detail: clean label / value pairs. */
-.facts { width: 100%; font-size: 14px; border-collapse: collapse; }
-.facts tr { border-bottom: 1px solid var(--line-soft); }
-.facts td { padding: 7px 0; }
-.facts td:first-child { color: var(--muted); width: 50%; }
-.facts td:last-child  { text-align: right; font-variant-numeric: tabular-nums; }
-
-/* Proof line: smaller and muted, below the facts table. */
-.proof {
-  margin: 10px 0 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--line-soft);
-  color: var(--faint);
   font-size: 12px;
-  line-height: 1.6;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
 }
 
-/* Farm plan steps: numbered with CSS counter. */
-.steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-}
+.facts { width: 100%; font-size: 14px; }
+.facts tr { border-bottom: 1px solid var(--line-soft); }
+.facts td { padding: 6px 0; }
+.facts td:first-child { color: var(--muted); width: 46%; }
+.facts td:last-child { font-family: var(--mono); text-align: right; }
 
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
 .steps li {
   position: relative;
-  padding: 0 0 14px 30px;
+  padding: 0 0 14px 34px;
   counter-increment: step;
-  font-size: 14px;
 }
-
 .steps li::before {
   content: counter(step);
   position: absolute;
   left: 0;
-  top: 2px;
-  width: 18px;
-  height: 18px;
-  border: 1px solid var(--line);
+  top: 1px;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--amber-dim);
   border-radius: 50%;
-  color: var(--faint);
-  font-size: 11px;
-  line-height: 17px;
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 21px;
   text-align: center;
-  font-variant-numeric: tabular-nums;
 }
-
-.steps p { margin: 0 0 3px; }
-.costline { margin: 0; color: var(--muted); font-size: 12px; }
-.totals   { margin: 12px 0 0; color: var(--text); font-size: 14px; font-weight: 600; }
-
-/* ---- Already trading section ----------------------------------------- */
-
-.live { margin-top: 32px; }
-.live h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
-.live p  { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
-.live .tablewrap { border-top: 1px solid var(--line); }
-.live tbody tr { cursor: default; }
-
-/* ---- Footer ---------------------------------------------------------- */
-
-footer {
-  padding: 16px 28px 28px;
-  border-top: 1px solid var(--line);
-  color: var(--faint);
+.steps p { margin: 0 0 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  background: var(--panel2);
+  color: var(--muted);
+  font-family: var(--mono);
   font-size: 12px;
 }
 
-footer p { margin: 0; max-width: 860px; line-height: 1.6; }
-footer p + p { margin-top: 4px; }
+.live { margin-top: 34px; }
+.live h2 { margin: 0 0 4px; font-size: 22px; }
+.live p { margin: 0 0 14px; color: var(--muted); }
+.live .tablewrap { border-top: 1px solid var(--line); }
+.live tbody tr { cursor: default; }
 
-/* ---- Responsive ------------------------------------------------------- */
+footer {
+  padding: 18px 28px 30px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 13px;
+}
+
+footer p { margin: 0; max-width: 860px; }
 
 @media (max-width: 760px) {
   .top, .model, .controls, main { padding-left: 16px; padding-right: 16px; }
-  h1 { font-size: 18px; }
+  h1 { font-size: 32px; }
   .detail .d-grid { grid-template-columns: 1fr; }
   .detail .d-col + .d-col { border-left: 0; border-top: 1px solid var(--line); }
-  .boardwrap { min-height: 11011px; }
+  .stats div { min-width: 45%; }
+  .boardwrap { min-height: 13604px; }
 }

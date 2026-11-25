@@ -40,11 +40,12 @@ async function run() {
   await page.screenshot({ path: ROOT + '/screenshots/2-detail.png' });
   console.log('2-detail.png saved');
 
-  // Screenshot 3: filtered (close detail, switch scope to watchlist)
-  await page.click('.d-close');
+  // Screenshot 3: filtered (close detail by clicking the selected row again — v2 has no .d-close button; a second click on the same row hides the panel, app.js:427 — then switch scope to watchlist)
+  await page.click('#rows tr:first-child');
   await page.waitForTimeout(400);
   await page.selectOption('#scope', 'watchlist');
   await page.waitForTimeout(600);
+  await page.evaluate(() => window.scrollTo(0, 0)); // detail scrollIntoView left the page scrolled; reset to top for a clean capture
   await page.screenshot({ path: ROOT + '/screenshots/3-filtered.png' });
   console.log('3-filtered.png saved');
 

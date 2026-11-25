@@ -7,7 +7,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const SERVE_DIR = path.resolve(__dirname, '../out');
+const SERVE_DIR = process.env.SERVE_DIR || path.resolve(__dirname, '../out');
 const PORT = 8792;
 const CHROME = process.env.HOME + '/.cache/ms-playwright/chromium-1255/chrome-linux64/chrome';
 const URL_BASE = 'http://127.0.0.1:' + PORT;
