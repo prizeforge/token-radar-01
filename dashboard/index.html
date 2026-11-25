@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Token Radar ranks 178 pre-token DeFi protocols by implied value, with a farm plan for each, recomputed in the page from the snapshot's own figures.">
+<meta name="description" content="Token Radar ranks 178 pre-token DeFi protocols by implied value, with a concrete farm plan for each, recomputed in the page from the snapshot's own figures.">
 <meta name="theme-color" content="#0f0f12">
 <title>Token Radar: pre-token protocols ranked by implied value</title>
 <link rel="stylesheet" href="app.css">
@@ -11,15 +11,16 @@
 </head>
 <body>
 <header class="top">
-  <p class="kicker">Token launch radar &middot; snapshot <span id="asof">&mdash;</span></p>
-  <h1>Token Radar</h1>
-  <p class="lede"><span id="boardcount">178</span> pre-token protocols, ranked by implied value. Each one records no token; the board keeps them apart from the protocols whose token already trades.</p>
-  <!-- The five figures below are the same ones the page recomputes from
-       data.js on load (see renderStats in app.js); they are written out
-       here so the line is full height on the first paint and nothing
-       below it shifts when the script re-fills them with identical
-       values. If the model ever changes a count, change it here too. -->
+  <div class="top-row">
+    <div>
+      <p class="kicker">Token launch radar &middot; snapshot <span id="asof">&mdash;</span></p>
+      <h1>Token Radar</h1>
+      <p class="lede"><span id="boardcount">178</span> pre-token protocols, ranked by implied value. Each one records no token; live-token peers sit apart below.</p>
+    </div>
+  </div>
+  <!-- Pre-filled so first paint has full height with zero layout shift before app.js hydrates. -->
   <dl class="stats" id="stats">
+    <div class="hero"><dt>Total implied value</dt><dd>$4.47B</dd></div>
     <div><dt>Watchlist covered</dt><dd>40 / 40</dd></div>
     <div><dt>Board rows</dt><dd>178</dd></div>
     <div><dt>Early rows</dt><dd>138</dd></div>
@@ -28,58 +29,100 @@
   </dl>
 </header>
 
-<section class="model" aria-label="How the value is worked out">
-  <h2>How the value is worked out</h2>
-  <p class="formula">implied = TVL &times; 0.30 &times; (1 + clamp(7d change, &minus;50%, +100%) &divide; 100 &times; 0.60) &times; (0.70 + min(age, 1460d) &divide; 1460 &times; 0.50) &times; (1 + 0.04 &times; min(chains &minus; 1, 5))</p>
-  <p class="fine">The page recomputes every row from that formula and regenerates every farm plan from the row&rsquo;s own record, so the numbers on screen are the model running, not a copy of a table. A protocol &ldquo;records no token&rdquo; when its DefiLlama record carries no market cap, no CoinGecko id and no symbol. That is the record&rsquo;s word, not proof it has none. The board never predicts whether or when a token is issued.</p>
+<section class="model" aria-label="How the implied value model works">
+  <div class="model-head">
+    <h2>Implied value model <span class="model-ver">radar-2</span></h2>
+    <p class="fine">Recomputed live in-page for all 178 rows from TVL, 7d change, age, and chains &mdash; never a hardcoded list.</p>
+  </div>
+  <p class="formula">implied = TVL &times; 0.30 &times; (1 + clamp(7d%, &minus;50, +100) &divide; 100 &times; 0.60) &times; (0.70 + min(age, 1460d) &divide; 1460 &times; 0.50) &times; (1 + 0.04 &times; min(chains &minus; 1, 5))</p>
+  <div class="factors">
+    <div class="factor"><span class="f-name">Base &middot; TVL &times; 0.30</span><span class="f-desc">30% of current TVL sets the baseline valuation.</span></div>
+    <div class="factor"><span class="f-name">Growth &middot; &times;0.70 to &times;1.60</span><span class="f-desc">7d change clamped &minus;50%..+100%, 0.60 weight.</span></div>
+    <div class="factor"><span class="f-name">Maturity &middot; &times;0.70 to &times;1.20</span><span class="f-desc">Age to 4y (1,460d) grants a longevity premium.</span></div>
+    <div class="factor"><span class="f-name">Breadth &middot; &times;1.00 to &times;1.20</span><span class="f-desc">+4% per extra chain, capped at 6+ (+20%).</span></div>
+  </div>
 </section>
 
 <nav class="controls" aria-label="Board filters">
-  <label class="ctl search">Search
-    <input id="q" type="search" placeholder="Name or slug" autocomplete="off">
-  </label>
-  <label class="ctl">Category
-    <select id="cat"></select>
-  </label>
-  <label class="ctl">Scope
+  <div class="ctl search">
+    <label for="q">Search</label>
+    <div class="search-wrap">
+      <input id="q" type="search" placeholder="Name or slug" autocomplete="off">
+      <button type="button" id="clear-q" class="clear-q" hidden aria-label="Clear search">&times;</button>
+    </div>
+  </div>
+  <div class="ctl">
+    <label for="scope">Scope</label>
     <select id="scope">
-      <option value="all">All rows</option>
-      <option value="watchlist">Watchlist only</option>
-      <option value="early">Early, below the floor</option>
+      <option value="all">All rows (178)</option>
+      <option value="watchlist">Watchlist only (40)</option>
+      <option value="early">Early, below floor (138)</option>
     </select>
-  </label>
-  <label class="ctl">Chain
+  </div>
+  <div class="ctl">
+    <label for="cat">Category</label>
+    <select id="cat"></select>
+  </div>
+  <div class="ctl">
+    <label for="chain">Chain</label>
     <select id="chain"></select>
-  </label>
-  <p class="legend"><span class="notoken"></span> no token recorded</p>
-  <p class="count" id="count"></p>
+  </div>
+  <div class="scope-pills" role="group" aria-label="Quick scope filter">
+    <button type="button" class="pill active" data-scope="all">All 178</button>
+    <button type="button" class="pill" data-scope="watchlist">Watchlist 40</button>
+    <button type="button" class="pill" data-scope="early">Early 138</button>
+    <button type="button" id="reset-filters" class="pill reset" hidden>Reset</button>
+  </div>
 </nav>
 
 <main>
   <section id="detail" class="detail" hidden aria-label="Protocol detail"></section>
 
+  <div class="board-bar">
+    <p class="legend"><span class="notoken"></span> no token recorded &nbsp;&middot;&nbsp; <span class="wl-swatch"></span> watchlist (40)</p>
+    <p class="kb-hint">&uarr;&darr; navigate &middot; Enter detail &middot; Esc close &middot; / search</p>
+    <p class="count" id="count">178 of 178 rows</p>
+  </div>
+
   <div class="tablewrap boardwrap">
     <table id="board">
       <thead>
         <tr>
-          <th data-sort="rank" aria-sort="ascending">Rank</th>
-          <th data-sort="name">Protocol</th>
-          <th data-sort="category">Category</th>
-          <th>Chains</th>
-          <th data-sort="tvl_usd">TVL</th>
-          <th data-sort="change_7d">7d</th>
-          <th data-sort="age_days">Age</th>
+          <th data-sort="rank" tabindex="0" aria-sort="ascending">Rank</th>
+          <th data-sort="name" tabindex="0">Protocol</th>
+          <th data-sort="category" tabindex="0">Category</th>
+          <th data-sort="chains_count" tabindex="0">Chains</th>
+          <th data-sort="tvl_usd" tabindex="0">TVL</th>
+          <th data-sort="change_7d" tabindex="0">7d</th>
+          <th data-sort="age_days" tabindex="0">Age</th>
           <th>Value</th>
-          <th data-sort="implied_value_usd">Implied value</th>
+          <th data-sort="implied_value_usd" tabindex="0">Implied value</th>
         </tr>
       </thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
 
+  <section class="movers" aria-label="Top 7-day movers">
+    <div class="movers-head">
+      <h2>Top 7d movers</h2>
+      <span class="movers-sub">Biggest 7d TVL swings and the implied-value impact from the growth factor (click any row to inspect)</span>
+    </div>
+    <div class="movers-grid">
+      <div class="mover-box">
+        <div class="mover-title pos">Top 7d gainers</div>
+        <div id="movers-up" class="mover-list"></div>
+      </div>
+      <div class="mover-box">
+        <div class="mover-title neg">Biggest 7d pullbacks</div>
+        <div id="movers-down" class="mover-list"></div>
+      </div>
+    </div>
+  </section>
+
   <section class="live" aria-label="Protocols whose token already trades">
     <h2>Already trading</h2>
-    <p>The market&rsquo;s own values, not the model&rsquo;s. These protocols are not on the board above.</p>
+    <p>The market&rsquo;s own values, not the model&rsquo;s. These protocols are kept apart from the pre-token board above.</p>
     <div class="tablewrap">
       <table id="livetable">
         <thead>

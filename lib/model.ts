@@ -117,6 +117,7 @@ export interface RadarRow {
   rank: number;
   slug: string;
   name: string;
+  symbol: string | null;
   category: string | null;
   chains: string[];
   tvl_usd: number;
@@ -309,68 +310,82 @@ function holdDaysFor(age: number | null): number {
   return 30;
 }
 
+/** Estimated setup/exit gas in USD from the primary chain and position size. */
+function gasFor(chain: string, capital: number): number {
+  if (chain.toLowerCase() === 'ethereum') return capital >= 150 ? 8 : 5;
+  return capital >= 150 ? 2 : 1;
+}
+
+/** Estimated weekly gas in USD from the primary chain. */
+function weeklyGasFor(chain: string): number {
+  return chain.toLowerCase() === 'ethereum' ? 3 : 1;
+}
+
 /** The category's main action, in the words a farmer can follow. */
-function actionFor(p: SnapshotProtocol, capital: number, chain: string): string {
+function actionFor(p: SnapshotProtocol, capital: number, chain: string, hold: number): string {
   const c = (p.category ?? '').toLowerCase();
   const name = p.name;
-  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Supply $${capital} of USDC to ${name} on ${chain} and leave the supply open.`;
-  if (c.includes('dex') || c.includes('leveraged farm')) return `Provide $${capital} of liquidity to ${name}'s main pool on ${chain} and leave the position open.`;
-  if (c.includes('yield aggregator') || c.includes('yield')) return `Deposit $${capital} of USDC into a ${name} vault on ${chain} and keep the shares.`;
-  if (c.includes('bridge')) return `Bridge $${capital} of USDC to ${chain} through ${name} and put the bridged funds to work in its app.`;
-  if (c.includes('staking') || c.includes('restak')) return `Stake $${capital} of the chain's staking asset through ${name} and keep the receipt token.`;
-  if (c.includes('perpetual') || c.includes('derivative')) return `Deposit $${capital} of USDC as margin on ${name} and open one small hedged position.`;
-  if (c.includes('prediction')) return `Fund $${capital} on ${name} and take one position in an active market.`;
-  if (c.includes('curator') || c.includes('allocator')) return `Deposit $${capital} into a ${name} vault on ${chain} and keep the shares.`;
-  if (c.includes('stable')) return `Mint or deposit $${capital} of the stable asset through ${name} on ${chain}.`;
-  if (c.includes('rwa')) return `Mint $${capital} of the yield-bearing asset ${name} issues on ${chain} and hold it.`;
-  if (c.includes('insurance')) return `Buy $${capital} of cover from ${name} on ${chain} and keep the policy active.`;
-  if (c.includes('basis')) return `Deposit $${capital} into a ${name} basis vault on ${chain} and keep the position open.`;
-  if (c.includes('chain')) return `Bridge $${capital} of USDC onto ${chain} and use it in one of the chain's own apps.`;
-  if (c.includes('payment')) return `Fund $${capital} into your ${name} balance on ${chain} and keep it ready to spend.`;
-  if (c.includes('liquidity manager')) return `Deposit $${capital} into a ${name} managed position on ${chain} and leave it running.`;
-  return `Deposit $${capital} of USDC into ${name} on ${chain} and keep the position open.`;
+  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Supply $${capital} of USDC or core collateral on ${name} (${chain}), verify the receipt token, and keep any borrow LTV below 50%.`;
+  if (c.includes('dex') || c.includes('leveraged farm')) return `Add $${capital} of liquidity to ${name}'s highest-TVL USDC pair on ${chain} with a 1% slippage cap and stake LP tokens if gauges exist.`;
+  if (c.includes('yield aggregator') || c.includes('yield')) return `Deposit $${capital} of USDC into ${name}'s flagship audited vault on ${chain} and confirm the vault share balance in your wallet.`;
+  if (c.includes('bridge')) return `Bridge $${capital} of USDC to ${chain} via ${name}'s canonical route, then deploy it into a native lending or LP pool on ${chain}.`;
+  if (c.includes('staking') || c.includes('restak')) return `Stake $${capital} of ${chain}'s native staking asset via ${name} and hold the liquid receipt token unspent in the same wallet.`;
+  if (c.includes('perpetual') || c.includes('derivative')) return `Deposit $${capital} of USDC as margin on ${name} (${chain}) and open one low-leverage (1x-2x) or delta-neutral hedged position.`;
+  if (c.includes('prediction')) return `Fund $${capital} of USDC on ${name} (${chain}) and split it across 2 active, liquid markets with clear near-term resolution dates.`;
+  if (c.includes('curator') || c.includes('allocator')) return `Allocate $${capital} of USDC into ${name}'s top curated vault on ${chain} and log your entry share price for tracking.`;
+  if (c.includes('stable')) return `Mint or deposit $${capital} of ${name}'s stablecoin on ${chain} and stake it inside the protocol's savings or stability pool.`;
+  if (c.includes('rwa')) return `Subscribe $${capital} of USDC into ${name}'s tokenized yield asset on ${chain} and hold the RWA token in self-custody.`;
+  if (c.includes('insurance')) return `Buy $${capital} of protocol cover or fund an underwriting tranche on ${name} (${chain}) for at least a ${hold}-day coverage term.`;
+  if (c.includes('basis')) return `Deposit $${capital} of USDC into ${name}'s basis-trade vault on ${chain} to earn funding-rate yield while staying delta-neutral.`;
+  if (c.includes('chain')) return `Bridge $${capital} of USDC onto ${chain} through its official bridge and complete an initial swap plus LP deposit in a native app.`;
+  if (c.includes('payment')) return `Load $${capital} of USDC into your ${name} account on ${chain} and execute one verified test transfer or merchant payment.`;
+  if (c.includes('liquidity manager')) return `Deposit $${capital} of USDC into a ${name} automated concentrated-liquidity range on ${chain} with auto-rebalancing enabled.`;
+  return `Deposit $${capital} of USDC into ${name}'s primary pool on ${chain} and confirm the active position appears on your portfolio dashboard.`;
 }
 
 /** The category's weekly qualifying action. */
-function weeklyFor(p: SnapshotProtocol, chain: string): string {
+function weeklyFor(p: SnapshotProtocol, capital: number, chain: string): string {
   const c = (p.category ?? '').toLowerCase();
   const name = p.name;
-  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Once a week, adjust the position on ${name}: add a little supply, or borrow a small amount and repay it the same day.`;
-  if (c.includes('dex') || c.includes('leveraged farm')) return `Once a week, route one swap through ${name} on ${chain} so the wallet shows trading activity as well as liquidity.`;
-  if (c.includes('yield aggregator') || c.includes('yield')) return `Once a week, harvest or compound the vault rewards on ${name} instead of letting them sit unclaimed.`;
-  if (c.includes('bridge')) return `Once a week, move a small amount through ${name} again, or use the bridged funds in a second app on ${chain}.`;
-  if (c.includes('staking') || c.includes('restak')) return `Once a week, check the staking rewards on ${name} and restake what has accrued.`;
-  if (c.includes('perpetual') || c.includes('derivative')) return `Once a week, rebalance the hedge on ${name} so the margin account stays active.`;
-  if (c.includes('prediction')) return `Once a week, settle one market on ${name} and take a position in a new one.`;
-  if (c.includes('curator') || c.includes('allocator')) return `Once a week, read ${name}'s allocation report and note which vaults it moved funds into.`;
-  if (c.includes('stable')) return `Once a week, check the peg and the yield on ${name}'s stable asset and top the balance up if it fell.`;
-  if (c.includes('rwa')) return `Once a week, check the yield that has accrued on ${name}'s asset and keep the holding through the next distribution.`;
-  if (c.includes('insurance')) return `Once a week, check that the ${name} policy is still active and that its cover amount matches the position.`;
-  if (c.includes('basis')) return `Once a week, check the funding rate ${name} is earning and keep the vault position open through it.`;
-  if (c.includes('chain')) return `Once a week, make one transaction in an app on ${chain} from the same wallet.`;
-  if (c.includes('payment')) return `Once a week, pay for something small with the ${name} balance so the account shows real use.`;
-  return `Once a week, do one qualifying action on ${name}: a deposit, a swap, a vote or a claim.`;
+  const small = Math.max(10, Math.round(capital / 5));
+  const micro = Math.max(5, Math.round(small / 2));
+  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Once a week, top up $${micro} of collateral on ${name} (${chain}) or borrow and same-day repay $10 to keep activity fresh.`;
+  if (c.includes('dex') || c.includes('leveraged farm')) return `Once a week, route a $${small} swap through ${name} on ${chain} (0.5% max slippage) so the wallet builds both LP and volume history.`;
+  if (c.includes('yield aggregator') || c.includes('yield')) return `Once a week, claim or compound accrued rewards on ${name} (${chain}) instead of leaving vault yield idle.`;
+  if (c.includes('bridge')) return `Once a week, bridge a $${micro} transfer via ${name} or interact with a second app on ${chain} using the bridged funds.`;
+  if (c.includes('staking') || c.includes('restak')) return `Once a week, verify accrued staking points or rewards on ${name} (${chain}) and restake into the same wallet.`;
+  if (c.includes('perpetual') || c.includes('derivative')) return `Once a week, rebalance your hedge on ${name} (${chain}) with a $${small} notional trade to maintain active weekly volume.`;
+  if (c.includes('prediction')) return `Once a week, settle resolved markets on ${name} and enter one new liquid market with $${micro}.`;
+  if (c.includes('curator') || c.includes('allocator')) return `Once a week, review ${name}'s vault allocation update on ${chain} and confirm your strategy APY and cap remain healthy.`;
+  if (c.includes('stable')) return `Once a week, check the peg and savings rate on ${name}'s stablecoin (${chain}) and compound or top up by $${micro}.`;
+  if (c.includes('rwa')) return `Once a week, confirm yield accrual on ${name}'s RWA balance (${chain}) and keep the position unbroken across distribution dates.`;
+  if (c.includes('insurance')) return `Once a week, verify your ${name} policy or underwriting share on ${chain} remains active and properly collateralized.`;
+  if (c.includes('basis')) return `Once a week, check the funding rate on ${name}'s basis vault (${chain}) and confirm the position stays within target spread.`;
+  if (c.includes('chain')) return `Once a week, execute at least one on-chain transaction (swap, lend, or mint) in a native ${chain} app from the same wallet.`;
+  if (c.includes('payment')) return `Once a week, settle a $${micro} transfer or card spend from your ${name} balance to build recurring usage.`;
+  return `Once a week, execute one qualifying on-chain action on ${name} (${chain}): a $${micro} top-up, swap, vote, or reward claim.`;
 }
 
 /** The category's second leg: a different feature of the same protocol, so the farm is not one action repeated. */
 function secondLegFor(p: SnapshotProtocol, capital: number, chain: string): string {
   const c = (p.category ?? '').toLowerCase();
   const name = p.name;
-  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Borrow $${Math.max(10, Math.round(capital / 5))} against the supply on ${name}, hold the loan for a week, then repay it in full.`;
-  if (c.includes('dex') || c.includes('leveraged farm')) return `Open a second, smaller position in another ${name} pool on ${chain}, about $${Math.max(10, Math.round(capital / 5))}, and keep both open.`;
-  if (c.includes('yield aggregator') || c.includes('yield')) return `Try a second ${name} vault strategy with about $${Math.max(10, Math.round(capital / 5))} so the wallet touches more than one product.`;
-  if (c.includes('bridge')) return `Use the bridged funds on ${chain} in a lending or swap app, then bridge a small amount back through ${name}.`;
-  if (c.includes('staking') || c.includes('restak')) return `Stake a second, smaller amount through ${name} and delegate it to a different validator or pool.`;
-  if (c.includes('perpetual') || c.includes('derivative')) return `Close the first hedge on ${name} and open a fresh one, so the account shows more than one completed trade.`;
-  if (c.includes('prediction')) return `Take a position in a second ${name} market in a different category from the first.`;
-  if (c.includes('curator') || c.includes('allocator')) return `Deposit about $${Math.max(10, Math.round(capital / 5))} into a second ${name} vault with a different risk profile.`;
-  if (c.includes('stable')) return `Provide $${Math.max(10, Math.round(capital / 5))} of ${name}'s stable asset as liquidity in a pool on ${chain}.`;
-  if (c.includes('rwa')) return `Hold the ${name} asset through one full distribution cycle before deciding whether to add more.`;
-  if (c.includes('insurance')) return `Add cover for a second position through ${name} so the wallet holds more than one policy.`;
-  if (c.includes('basis')) return `Keep the ${name} vault position open through one full funding cycle and note the rate it paid.`;
-  if (c.includes('chain')) return `Try a second app on ${chain} from the same wallet, such as a swap or a lending market.`;
-  if (c.includes('payment')) return `Use the ${name} balance on a second payment rail, such as a card top-up or a merchant payment.`;
-  return `Use a second feature of ${name} once, such as its vote, its rewards page or a different pool.`;
+  const small = Math.max(10, Math.round(capital / 5));
+  if (c.includes('lend') || c.includes('cdp') || c.includes('collateral')) return `Borrow $${small} against your ${name} supply on ${chain} (health factor > 2.0), hold for 7 days, then repay in full.`;
+  if (c.includes('dex') || c.includes('leveraged farm')) return `Open a second $${small} LP position in a different ${name} fee tier or pool on ${chain} and keep both active.`;
+  if (c.includes('yield aggregator') || c.includes('yield')) return `Deploy $${small} into a second ${name} vault strategy on ${chain} so the wallet records multi-vault usage.`;
+  if (c.includes('bridge')) return `Use $${small} of bridged funds on ${chain} in a native swap or lending app, then bridge $${small} back via ${name}.`;
+  if (c.includes('staking') || c.includes('restak')) return `Stake an additional $${small} via ${name} (${chain}) and delegate it to a different validator or restaking operator.`;
+  if (c.includes('perpetual') || c.includes('derivative')) return `Close the initial hedge on ${name} (${chain}) and open a fresh $${small} limit order so multiple trades settle.`;
+  if (c.includes('prediction')) return `Allocate $${small} to a second ${name} market in an unrelated category to diversify resolution activity.`;
+  if (c.includes('curator') || c.includes('allocator')) return `Deposit $${small} into a second ${name} curated vault on ${chain} with a distinct collateral profile.`;
+  if (c.includes('stable')) return `Pair $${small} of ${name}'s stablecoin with USDC in a ${chain} liquidity pool for secondary yield.`;
+  if (c.includes('rwa')) return `Deploy $${small} of ${name}'s RWA token as collateral or LP on ${chain} through one full distribution cycle.`;
+  if (c.includes('insurance')) return `Add $${small} of secondary cover or pool underwriting on ${name} (${chain}) so the wallet holds two active positions.`;
+  if (c.includes('basis')) return `Allocate $${small} to a second maturity or pair on ${name} (${chain}) and hold through one full funding cycle.`;
+  if (c.includes('chain')) return `Use $${small} in a second native ${chain} protocol (such as a money market or perpetual DEX) from the same wallet.`;
+  if (c.includes('payment')) return `Route $${small} through a second ${name} payment rail on ${chain}, such as a virtual card top-up or payout link.`;
+  return `Use $${small} in a second ${name} module on ${chain}, such as governance staking, a secondary pool, or points boost.`;
 }
 
 /**
@@ -381,38 +396,41 @@ function secondLegFor(p: SnapshotProtocol, capital: number, chain: string): stri
 export function farmSteps(p: SnapshotProtocol, age: number | null): FarmStep[] {
   const chain = chainOf(p);
   const capital = capitalFor(p);
+  const small = Math.max(10, Math.round(capital / 5));
   const hold = holdDaysFor(age);
-  const gas = capital >= 150 ? 8 : 4;
+  const gas = gasFor(chain, capital);
+  const wgas = weeklyGasFor(chain);
+  const weeks = Math.ceil(hold / 7);
   return [
     {
-      text: `Use a fresh wallet that holds only the funds you plan to farm, and keep its seed phrase offline.`,
-      cost: 'under $3 of gas for the first transaction',
-      time: '5 minutes',
+      text: `Create a dedicated wallet on ${chain}, fund it with $${capital + small} USDC plus $${gas * 3 + wgas * weeks} in gas, and bookmark the official ${p.name} URL.`,
+      cost: `$${capital + small} capital + $${gas} transfer gas`,
+      time: '10 minutes',
     },
     {
-      text: actionFor(p, capital, chain),
-      cost: `$${capital} of capital and about $${gas} of gas`,
-      time: '15 minutes to set up',
+      text: actionFor(p, capital, chain, hold),
+      cost: `$${capital} principal + $${gas} setup gas`,
+      time: '15 minutes',
     },
     {
-      text: weeklyFor(p, chain),
-      cost: 'about $2 of gas a week',
-      time: '10 minutes a week',
+      text: weeklyFor(p, capital, chain),
+      cost: `$${wgas} gas/week ($${wgas * weeks} over ${hold}d)`,
+      time: '10 minutes/week',
     },
     {
       text: secondLegFor(p, capital, chain),
-      cost: `about $${Math.max(10, Math.round(capital / 5))} of extra capital and about $${gas} of gas`,
+      cost: `$${small} extra capital + $${gas} setup gas`,
       time: '20 minutes',
     },
     {
-      text: `Hold the position for at least ${hold} days so the activity is counted in more than one snapshot.`,
-      cost: `the $${capital} stays in the position`,
+      text: `Keep both positions open untouched for at least ${hold} days (${weeks} weekly snapshots) without dropping below $${capital} deployed.`,
+      cost: `$0 extra ($${capital + small} stays deployed)`,
       time: `${hold} days`,
     },
     {
-      text: `Before you withdraw, open the protocol's own points or rewards page and claim only from the link it publishes.`,
-      cost: 'no fee to check, and never pay to claim',
-      time: '10 minutes',
+      text: `Verify your points or rewards balance on ${p.name}'s official ${chain} dashboard, claim only via the verified UI, then unwind cleanly to USDC.`,
+      cost: `$${gas} claim/withdraw gas ($0 claim fee)`,
+      time: '15 minutes',
     },
   ];
 }
@@ -440,6 +458,7 @@ export function radarRow(row: BoardRow): RadarRow {
     rank: row.rank,
     slug: row.slug,
     name: row.name,
+    symbol: row.symbol,
     category: row.category,
     chains: row.chains,
     tvl_usd: row.tvl_usd,
